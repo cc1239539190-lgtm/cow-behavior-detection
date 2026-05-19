@@ -72,15 +72,15 @@ export async function detectFrame(img: CanvasImageSource) {
   const numClass = CLASS_NAMES.length;
 
   for (let i = 0; i < 8400; i++) {
-    const x = data[i];
-    const y = data[i + 8400];
-    const w = data[i + 16800];
-    const h = data[i + 25200];
-    const conf = data[i + 33600];
+    const x = Number(data[i]);
+    const y = Number(data[i + 8400]);
+    const w = Number(data[i + 16800]);
+    const h = Number(data[i + 25200]);
+    const conf = Number(data[i + 33600]);
 
     let maxScore = 0, clsId = 0;
     for (let c = 0; c < numClass; c++) {
-      const score = data[i + (5 + c) * 8400];
+      const score = Number(data[i + (5 + c) * 8400]);
       if (score > maxScore) { maxScore = score; clsId = c; }
     }
 
