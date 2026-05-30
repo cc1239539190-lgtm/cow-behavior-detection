@@ -19,6 +19,14 @@ export default function Home() {
       <p className="text-center text-gray-600 mt-2">
         支持：图片 | 视频 | 实时摄像头监控
       </p>
+      <div className="text-center mt-3">
+        <a
+          href="/monitor"
+          className="inline-block px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-bold"
+        >
+          实时监控中心
+        </a>
+      </div>
       <DetectionUI />
     </main>
   );

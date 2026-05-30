@@ -1,16 +1,44 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { detectFrame, drawBoxes } from "@/utils/detector";
+import { dataSender } from "@/utils/dataSender";
+import { DetectionBox } from "@/utils/types";
+
+/** 将检测结果转为结构化数据 */
+function toDetectionBoxes(
+    boxes: { x1: number; y1: number; x2: number; y2: number; conf: number; cls: number }[],
+    canvasWidth: number,
+    canvasHeight: number
+): DetectionBox[] {
+    const CLASS_NAMES = ["drinking", "eating", "resting", "standing", "walking"];
+    return boxes.map((b) => ({
+        x1: b.x1,
+        y1: b.y1,
+        x2: b.x2,
+        y2: b.y2,
+        conf: b.conf,
+        cls: b.cls,
+        className: CLASS_NAMES[b.cls] || "unknown",
+    }));
+}
 
 export default function DetectionUI() {
-  const [tab, setTab] = useState<"img" | "video" | "cam">("img");
-  const [count, setCount] = useState(0);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const camRef = useRef<HTMLVideoElement>(null);
-  const streaming = useRef(false);
+    const [tab, setTab] = useState<"img" | "video" | "cam">("img");
+    const [count, setCount] = useState(0);
+    const [sending, setSending] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
+    const imgRef = useRef<HTMLImageElement>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const camRef = useRef<HTMLVideoElement>(null);
+    const streaming = useRef(false);
+
+    // 组件卸载时停止发送
+    useEffect(() => {
+        return () => {
+            dataSender.stopSending();
+        };
+    }, []);
 
   // 图片检测
   const uploadImg = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,61 +60,96 @@ export default function DetectionUI() {
   };
 
   // 视频检测
-  const uploadVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    videoRef.current!.src = URL.createObjectURL(f);
-  };
+    const uploadVideo = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        videoRef.current!.src = URL.createObjectURL(f);
+    };
 
-  const runVideoDetect = () => {
-    const v = videoRef.current!;
-    const cvs = canvasRef.current!;
-    const ctx = cvs.getContext("2d")!;
-    cvs.width = v.videoWidth;
-    cvs.height = v.videoHeight;
+    const runVideoDetect = () => {
+        const v = videoRef.current!;
+        const cvs = canvasRef.current!;
+        const ctx = cvs.getContext("2d")!;
+        cvs.width = v.videoWidth;
+        cvs.height = v.videoHeight;
 
-    async function loop() {
-      if (v.paused) return;
-      ctx.drawImage(v, 0, 0);
-      const boxes = await detectFrame(v);
-      drawBoxes(ctx, boxes);
-      setCount(boxes.length);
-      requestAnimationFrame(loop);
-    }
-    v.play();
-    loop();
-  };
+        // 启动数据上报
+        dataSender.configure({ cameraId: "video-detection", intervalMs: 2000 });
+        dataSender.startSending();
+        setSending(true);
 
-  // 摄像头检测
-  const startCam = async () => {
-    if (streaming.current) return;
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    const cam = camRef.current!;
-    cam.srcObject = stream;
-    cam.play();
-    streaming.current = true;
+        async function loop() {
+            if (v.paused) {
+                dataSender.stopSending();
+                setSending(false);
+                return;
+            }
+            ctx.drawImage(v, 0, 0);
+            const boxes = await detectFrame(v);
+            drawBoxes(ctx, boxes);
+            setCount(boxes.length);
+            dataSender.cacheDetections(
+                toDetectionBoxes(boxes, cvs.width, cvs.height),
+                cvs.width,
+                cvs.height,
+                "video"
+            );
+            requestAnimationFrame(loop);
+        }
+        v.play();
+        loop();
+    };
 
-    const cvs = canvasRef.current!;
-    const ctx = cvs.getContext("2d")!;
-    cvs.width = 640;
-    cvs.height = 480;
+    // 摄像头检测
+    const startCam = async () => {
+        if (streaming.current) return;
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+        });
+        const cam = camRef.current!;
+        cam.srcObject = stream;
+        cam.play();
+        streaming.current = true;
 
-    async function loop() {
-      if (!streaming.current) return;
-      ctx.drawImage(cam, 0, 0);
-      const boxes = await detectFrame(cam);
-      drawBoxes(ctx, boxes);
-      setCount(boxes.length);
-      requestAnimationFrame(loop);
-    }
-    loop();
-  };
+        const cvs = canvasRef.current!;
+        const ctx = cvs.getContext("2d")!;
+        cvs.width = 640;
+        cvs.height = 480;
 
-  const stopCam = () => {
-    const cam = camRef.current!;
-    (cam.srcObject as MediaStream)?.getTracks().forEach(t => t.stop());
-    streaming.current = false;
-  };
+        // 启动数据上报
+        dataSender.configure({
+            cameraId: "live-camera",
+            intervalMs: 2000,
+        });
+        dataSender.startSending();
+        setSending(true);
+
+        async function loop() {
+            if (!streaming.current) return;
+            ctx.drawImage(cam, 0, 0);
+            const boxes = await detectFrame(cam);
+            drawBoxes(ctx, boxes);
+            setCount(boxes.length);
+            dataSender.cacheDetections(
+                toDetectionBoxes(boxes, cvs.width, cvs.height),
+                cvs.width,
+                cvs.height,
+                "camera"
+            );
+            requestAnimationFrame(loop);
+        }
+        loop();
+    };
+
+    const stopCam = () => {
+        const cam = camRef.current!;
+        (cam.srcObject as MediaStream)
+            ?.getTracks()
+            .forEach((t) => t.stop());
+        streaming.current = false;
+        dataSender.stopSending();
+        setSending(false);
+    };
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-transparent min-h-screen">
@@ -125,12 +188,33 @@ export default function DetectionUI() {
       </div>
 
       {/* 检测计数卡片 */}
-      <div className="flex justify-center mb-6">
-        <div className="bg-white/70 rounded-lg px-6 py-3 shadow-sm border border-gray-100">
-          <span className="text-gray-600 font-medium">检测目标数量：</span>
-          <span className="text-2xl font-bold text-red-600 ml-2">{count}</span>
-        </div>
-      </div>
+            <div className="flex justify-center mb-6">
+                <div className="bg-white/70 rounded-lg px-6 py-3 shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div>
+                        <span className="text-gray-600 font-medium">
+                            检测目标数量：
+                        </span>
+                        <span className="text-2xl font-bold text-red-600 ml-2">
+                            {count}
+                        </span>
+                    </div>
+                    {sending && (
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full font-bold animate-pulse-alert">
+                            数据上报中
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            {/* 导航链接 */}
+            <div className="flex justify-center mb-6">
+                <a
+                    href="/monitor"
+                    className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-bold"
+                >
+                    进入实时监控中心
+                </a>
+            </div>
 
       {/* 画布/播放器区域 */}
       <div className="bg-black rounded-xl shadow-lg overflow-hidden mb-8 border border-gray-200">
