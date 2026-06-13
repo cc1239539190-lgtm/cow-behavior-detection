@@ -1,0 +1,53 @@
+// 奶牛行为智能检测系统 — Prisma 数据模型
+
+generator client {
+    provider = "prisma-client"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+model DetectionFrame {
+    id          Int             @id @default(autoincrement())
+    cameraId    String          @map("camera_id")
+    timestamp   BigInt
+    source      String
+    frameWidth  Int             @map("frame_width") @default(0)
+    frameHeight Int             @map("frame_height") @default(0)
+    createdAt   DateTime        @default(now()) @map("created_at")
+    boxes       DetectionBox[]
+
+    @@index([cameraId, timestamp])
+    @@map("detection_frames")
+}
+
+model DetectionBox {
+    id        Int             @id @default(autoincrement())
+    frameId   Int             @map("frame_id")
+    frame     DetectionFrame  @relation(fields: [frameId], references: [id], onDelete: Cascade)
+    x1        Float
+    y1        Float
+    x2        Float
+    y2        Float
+    conf      Float
+    cls       Int
+    className String          @map("class_name")
+
+    @@map("detection_boxes")
+}
+
+model Alert {
+    id            String   @id
+    type          String
+    severity      String
+    message       String
+    timestamp     BigInt
+    acknowledged  Boolean  @default(false)
+    cameraId      String   @map("camera_id")
+
+    @@index([acknowledged])
+    @@index([cameraId])
+    @@map("alerts")
+}

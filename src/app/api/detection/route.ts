@@ -23,9 +23,12 @@ export async function POST(request: NextRequest) {
             frameHeight: body.frameHeight || 0,
         };
 
-        store.addDetection(body.cameraId, frame);
+        await store.addDetection(body.cameraId, frame);
 
-        const result = anomalyDetector.analyzeFrame(body.cameraId, frame);
+        const result = await anomalyDetector.analyzeFrame(
+            body.cameraId,
+            frame
+        );
 
         const status = anomalyDetector.getStatus(body.cameraId);
 
@@ -57,7 +60,7 @@ export async function GET(request: NextRequest) {
         200
     );
 
-    const frames = store.getRecentDetections(cameraId, limit);
+    const frames = await store.getRecentDetections(cameraId, limit);
     const status = anomalyDetector.getStatus(cameraId);
 
     return NextResponse.json({

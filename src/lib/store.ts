@@ -1,84 +1,132 @@
+import { db } from "@/lib/db";
 import { DetectionFrame, AlertRecord, BehaviorStats } from "@/utils/types";
 
-/** 全局内存数据存储 */
-class DetectionStore {
-    /** cameraId → 最近检测帧列表 */
-    private detectionHistory = new Map<string, DetectionFrame[]>();
-    /** 所有告警记录 */
-    private alerts: AlertRecord[] = [];
-    /** 数据保留时间（毫秒） */
-    private readonly RETENTION_MS = 10 * 60 * 1000;
-    /** 每路摄像头最多保留帧数 */
-    private readonly MAX_FRAMES_PER_CAMERA = 300;
+/** 将 Prisma 返回的帧数据转为应用层 DetectionFrame 格式 */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toDetectionFrame(f: any): DetectionFrame {
+    return {
+        timestamp: Number(f.timestamp),
+        source: f.source,
+        detections: (f.boxes || []).map(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (b: any) => ({
+                x1: b.x1,
+                y1: b.y1,
+                x2: b.x2,
+                y2: b.y2,
+                conf: b.conf,
+                cls: b.cls,
+                className: b.className,
+            })
+        ),
+        frameWidth: f.frameWidth,
+        frameHeight: f.frameHeight,
+    };
+}
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toAlertRecord(a: any): AlertRecord {
+    return {
+        id: a.id,
+        type: a.type,
+        severity: a.severity,
+        message: a.message,
+        timestamp: Number(a.timestamp),
+        acknowledged: a.acknowledged,
+        cameraId: a.cameraId,
+    };
+}
+
+/** Prisma 数据访问层 */
+export const store = {
     /** 添加一帧检测数据 */
-    addDetection(
+    async addDetection(
         cameraId: string,
         frame: DetectionFrame
-    ): void {
-        const frames = this.detectionHistory.get(cameraId) || [];
-        frames.push(frame);
-
-        // 限制帧数
-        while (frames.length > this.MAX_FRAMES_PER_CAMERA) {
-            frames.shift();
-        }
-
-        this.detectionHistory.set(cameraId, frames);
-    }
+    ): Promise<void> {
+        await db.detectionFrame.create({
+            data: {
+                cameraId,
+                timestamp: BigInt(frame.timestamp),
+                source: frame.source,
+                frameWidth: frame.frameWidth,
+                frameHeight: frame.frameHeight,
+                boxes: {
+                    create: frame.detections.map((d) => ({
+                        x1: d.x1,
+                        y1: d.y1,
+                        x2: d.x2,
+                        y2: d.y2,
+                        conf: d.conf,
+                        cls: d.cls,
+                        className: d.className,
+                    })),
+                },
+            },
+        });
+    },
 
     /** 获取指定摄像头的最近检测帧 */
-    getRecentDetections(
+    async getRecentDetections(
         cameraId: string,
         limit = 50
-    ): DetectionFrame[] {
-        const frames = this.detectionHistory.get(cameraId) || [];
-        return frames.slice(-limit);
-    }
+    ): Promise<DetectionFrame[]> {
+        const frames = await db.detectionFrame.findMany({
+            where: { cameraId },
+            orderBy: { timestamp: "desc" },
+            take: limit,
+            include: { boxes: true },
+        });
 
-    /** 获取所有摄像头在最近 timeWindow 秒内的检测帧 */
-    getRecentFramesForAll(timeWindowSec = 30): DetectionFrame[] {
-        const now = Date.now();
-        const cutoff = now - timeWindowSec * 1000;
-        const result: DetectionFrame[] = [];
+        return frames.map(toDetectionFrame).reverse();
+    },
 
-        for (const frames of this.detectionHistory.values()) {
-            for (const frame of frames) {
-                if (frame.timestamp > cutoff) {
-                    result.push(frame);
-                }
-            }
-        }
+    /** 获取所有摄像头在最近 timeWindowSec 秒内的检测帧 */
+    async getRecentFramesForAll(
+        timeWindowSec = 30
+    ): Promise<DetectionFrame[]> {
+        const cutoff = BigInt(Date.now() - timeWindowSec * 1000);
 
-        return result;
-    }
+        const frames = await db.detectionFrame.findMany({
+            where: { timestamp: { gt: cutoff } },
+            include: { boxes: true },
+            orderBy: { timestamp: "desc" },
+            take: 500,
+        });
 
-    /** 获取活跃摄像头数量（最近 30 秒有数据） */
-    getActiveCameraCount(): number {
-        const now = Date.now();
-        const cutoff = now - 30 * 1000;
-        let count = 0;
+        return frames.map(toDetectionFrame);
+    },
 
-        for (const frames of this.detectionHistory.values()) {
-            const lastFrame = frames[frames.length - 1];
-            if (lastFrame && lastFrame.timestamp > cutoff) {
-                count++;
-            }
-        }
-
-        return count;
-    }
+    /** 获取活跃摄像头数量（最近30秒有数据） */
+    async getActiveCameraCount(): Promise<number> {
+        const cutoff = BigInt(Date.now() - 30 * 1000);
+        const result = await db.detectionFrame.groupBy({
+            by: ["cameraId"],
+            where: { timestamp: { gt: cutoff } },
+        });
+        return result.length;
+    },
 
     /** 获取指定摄像头最后活跃时间 */
-    getLastActiveTime(cameraId: string): number | null {
-        const frames = this.detectionHistory.get(cameraId);
-        if (!frames || frames.length === 0) return null;
-        return frames[frames.length - 1].timestamp;
-    }
+    async getLastActiveTime(cameraId: string): Promise<number | null> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const frame: any = await db.detectionFrame.findFirst({
+            where: { cameraId },
+            orderBy: { timestamp: "desc" },
+            select: { timestamp: true },
+        });
+        return frame ? Number(frame.timestamp) : null;
+    },
 
-    /** 获取行为分布统计（基于最近 30 秒数据） */
-    getBehaviorDistribution(): BehaviorStats {
-        const recentFrames = this.getRecentFramesForAll(30);
+    /** 获取行为分布统计（基于最近30秒数据） */
+    async getBehaviorDistribution(): Promise<BehaviorStats> {
+        const cutoff = BigInt(Date.now() - 30 * 1000);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const boxes: any[] = await db.detectionBox.findMany({
+            where: { frame: { timestamp: { gt: cutoff } } },
+            select: { className: true },
+        });
+
         const stats: BehaviorStats = {
             drinking: 0,
             eating: 0,
@@ -87,101 +135,91 @@ class DetectionStore {
             walking: 0,
         };
 
-        for (const frame of recentFrames) {
-            for (const det of frame.detections) {
-                const cls = det.className as keyof BehaviorStats;
-                if (cls in stats) {
-                    stats[cls]++;
-                }
+        for (const box of boxes) {
+            const cls = box.className as keyof BehaviorStats;
+            if (cls in stats) {
+                stats[cls]++;
             }
         }
 
         return stats;
-    }
+    },
 
     /** 获取总检测次数 */
-    getTotalDetections(): number {
-        let total = 0;
-        for (const frames of this.detectionHistory.values()) {
-            for (const frame of frames) {
-                total += frame.detections.length;
-            }
-        }
-        return total;
-    }
+    async getTotalDetections(): Promise<number> {
+        return db.detectionBox.count();
+    },
 
     /** 添加告警 */
-    addAlert(alert: AlertRecord): void {
-        this.alerts.push(alert);
-    }
+    async addAlert(alert: AlertRecord): Promise<void> {
+        await db.alert.create({
+            data: {
+                id: alert.id,
+                type: alert.type,
+                severity: alert.severity,
+                message: alert.message,
+                timestamp: BigInt(alert.timestamp),
+                acknowledged: alert.acknowledged,
+                cameraId: alert.cameraId,
+            },
+        });
+    },
 
     /** 获取告警列表 */
-    getAlerts(acknowledged?: boolean): AlertRecord[] {
-        let result = this.alerts;
-        if (acknowledged !== undefined) {
-            result = result.filter((a) => a.acknowledged === acknowledged);
-        }
-        // 按时间倒序
-        return result.sort(
-            (a, b) => b.timestamp - a.timestamp
-        );
-    }
+    async getAlerts(acknowledged?: boolean): Promise<AlertRecord[]> {
+        const where = acknowledged !== undefined ? { acknowledged } : {};
+        const alerts = await db.alert.findMany({
+            where,
+            orderBy: { timestamp: "desc" },
+        });
+
+        return alerts.map(toAlertRecord);
+    },
 
     /** 确认告警 */
-    acknowledgeAlert(id: string): boolean {
-        const alert = this.alerts.find((a) => a.id === id);
-        if (alert) {
-            alert.acknowledged = true;
+    async acknowledgeAlert(id: string): Promise<boolean> {
+        try {
+            await db.alert.update({
+                where: { id },
+                data: { acknowledged: true },
+            });
             return true;
+        } catch {
+            return false;
         }
-        return false;
-    }
+    },
 
     /** 获取今日告警数 */
-    getTodayAlertCount(): number {
+    async getTodayAlertCount(): Promise<number> {
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
-        return this.alerts.filter(
-            (a) => a.timestamp >= todayStart.getTime()
-        ).length;
-    }
+        return db.alert.count({
+            where: {
+                timestamp: { gte: BigInt(todayStart.getTime()) },
+            },
+        });
+    },
 
     /** 检查是否存在相同类型的未确认告警（防重复） */
-    hasActiveAlert(cameraId: string, type: string): boolean {
-        return this.alerts.some(
-            (a) =>
-                a.cameraId === cameraId &&
-                a.type === type &&
-                !a.acknowledged
-        );
-    }
+    async hasActiveAlert(
+        cameraId: string,
+        type: string
+    ): Promise<boolean> {
+        const count = await db.alert.count({
+            where: {
+                cameraId,
+                type,
+                acknowledged: false,
+            },
+        });
+        return count > 0;
+    },
 
-    /** 清理过期数据 */
-    cleanup(): void {
-        const cutoff = Date.now() - this.RETENTION_MS;
-
-        for (const [cameraId, frames] of this.detectionHistory) {
-            const recent = frames.filter((f) => f.timestamp > cutoff);
-            if (recent.length === 0) {
-                this.detectionHistory.delete(cameraId);
-            } else {
-                this.detectionHistory.set(cameraId, recent);
-            }
-        }
-    }
-}
-
-/** 全局单例 */
-export const store = new DetectionStore();
-
-/** 每 5 分钟自动清理一次 */
-if (typeof globalThis !== "undefined") {
-    const intervalId = setInterval(
-        () => store.cleanup(),
-        5 * 60 * 1000
-    );
-    // Node.js 环境下防止定时器阻止进程退出
-    if (typeof process !== "undefined") {
-        process.on("exit", () => clearInterval(intervalId));
-    }
-}
+    /** 清理过期数据（保留最近10分钟） */
+    async cleanup(): Promise<void> {
+        const cutoff = BigInt(Date.now() - 10 * 60 * 1000);
+        await db.detectionFrame.deleteMany({
+            where: { timestamp: { lt: cutoff } },
+        });
+    },
+};

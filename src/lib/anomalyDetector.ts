@@ -50,10 +50,10 @@ class AnomalyDetector {
     }
 
     /** 分析一帧数据，返回是否需要发起告警 */
-    analyzeFrame(
+    async analyzeFrame(
         cameraId: string,
         frame: DetectionFrame
-    ): { triggered: boolean; alert?: AlertRecord } {
+    ): Promise<{ triggered: boolean; alert?: AlertRecord }> {
         const state = this.getState(cameraId);
         const now = Date.now();
 
@@ -63,11 +63,9 @@ class AnomalyDetector {
 
         // ---- 处理躺卧状态机 ----
         if (hasResting && state.restingStartTime === null) {
-            // 开始躺卧计时
             state.restingStartTime = now;
             state.alertLevel = "none";
         } else if (hasResting && state.restingStartTime !== null) {
-            // 持续躺卧中，检查是否超过阈值
             const restingDuration = now - state.restingStartTime;
 
             if (
@@ -79,14 +77,14 @@ class AnomalyDetector {
                     id: this.genAlertId(),
                     type: "cow_down",
                     severity: "critical",
-                    message: `紧急：牛只异常躺卧超过${
-                        Math.floor(restingDuration / 60000)
-                    }分钟！`,
+                    message: `紧急：牛只异常躺卧超过${Math.floor(
+                        restingDuration / 60000
+                    )}分钟！`,
                     timestamp: now,
                     acknowledged: false,
                     cameraId,
                 };
-                store.addAlert(alert);
+                await store.addAlert(alert);
                 return { triggered: true, alert };
             } else if (
                 restingDuration >= THRESHOLDS.RESTING_WARNING_MS &&
@@ -104,11 +102,10 @@ class AnomalyDetector {
                     acknowledged: false,
                     cameraId,
                 };
-                store.addAlert(alert);
+                await store.addAlert(alert);
                 return { triggered: true, alert };
             }
         } else if (!hasResting && state.restingStartTime !== null) {
-            // 躺卧结束，重置状态
             state.restingStartTime = null;
             state.alertLevel = "none";
         }
@@ -117,7 +114,7 @@ class AnomalyDetector {
     }
 
     /** 检查所有摄像头是否有离线 */
-    checkOffline(): AlertRecord[] {
+    async checkOffline(): Promise<AlertRecord[]> {
         const now = Date.now();
         const newAlerts: AlertRecord[] = [];
 
@@ -139,7 +136,7 @@ class AnomalyDetector {
                     acknowledged: false,
                     cameraId,
                 };
-                store.addAlert(alert);
+                await store.addAlert(alert);
                 newAlerts.push(alert);
             }
         }
@@ -157,9 +154,7 @@ class AnomalyDetector {
         const state = this.getState(cameraId);
         const now = Date.now();
         const resting = state.restingStartTime !== null;
-        const restingDuration = resting
-            ? now - state.restingStartTime!
-            : 0;
+        const restingDuration = resting ? now - state.restingStartTime! : 0;
 
         return {
             resting,

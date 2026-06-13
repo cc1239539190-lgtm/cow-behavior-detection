@@ -16,11 +16,11 @@ export async function GET(request: NextRequest) {
         500
     );
 
-    const alerts = store.getAlerts(acknowledged).slice(0, limit);
+    const alerts = await store.getAlerts(acknowledged);
 
     return NextResponse.json({
         total: alerts.length,
-        alerts,
+        alerts: alerts.slice(0, limit),
     });
 }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
             cameraId: body.cameraId || "default",
         };
 
-        store.addAlert(alert);
+        await store.addAlert(alert);
 
         return NextResponse.json({ success: true, alert }, { status: 201 });
     } catch {
@@ -62,7 +62,7 @@ export async function PATCH(request: NextRequest) {
             );
         }
 
-        const result = store.acknowledgeAlert(body.id);
+        const result = await store.acknowledgeAlert(body.id);
 
         if (!result) {
             return NextResponse.json(
