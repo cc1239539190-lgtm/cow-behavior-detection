@@ -16,8 +16,25 @@ function createPrismaClient(): PrismaClient {
     return new PrismaClient({ adapter });
 }
 
-export const db = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = db;
+/** 懒加载 PrismaClient：仅在首次 API 请求时才连接数据库，避免构建时因无 DATABASE_URL 报错 */
+function getPrisma(): PrismaClient {
+    if (globalForPrisma.prisma) {
+        return globalForPrisma.prisma;
+    }
+    const client = createPrismaClient();
+    globalForPrisma.prisma = client;
+    return client;
 }
+
+/** 代理对象，所有属性访问都会经过 getPrisma() 懒初始化 */
+export const db = new Proxy({} as PrismaClient, {
+    get(_target, prop: keyof PrismaClient) {
+        const client = getPrisma();
+        const value = client[prop];
+        if (typeof value === "function") {
+            return (...args: unknown[]) =>
+                (value as (...a: unknown[]) => unknown).apply(client, args);
+        }
+        return value;
+    },
+});
