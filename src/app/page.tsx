@@ -15,7 +15,7 @@ export default function Home() {
             <div className="pt-3 pb-1 text-center">
                 <div className="flex items-center justify-center gap-3">
                     <h1 className="text-2xl font-bold text-blue-700">
-                        奶牛行为智能检测系统 V1.0
+                        奶牛行为智能检测系统 V1.1
                     </h1>
                     <a
                         href="https://github.com/cc1239539190-lgtm/cow-behavior-detection"
