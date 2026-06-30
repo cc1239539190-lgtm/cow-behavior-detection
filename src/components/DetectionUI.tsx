@@ -352,14 +352,13 @@ export default function DetectionUI() {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex-1 bg-[#1a1a1a] flex items-center justify-center min-h-[250px]">
-                            {showCanvas ? (
-                                <canvas
-                                    ref={canvasRef}
-                                    className="w-full h-full object-contain"
-                                />
-                            ) : (
-                                <p className="text-gray-500 text-sm">
+                        <div className="flex-1 bg-[#1a1a1a] flex items-center justify-center min-h-[250px] relative">
+                            <canvas
+                                ref={canvasRef}
+                                className="w-full h-full object-contain"
+                            />
+                            {!showCanvas && (
+                                <p className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm pointer-events-none">
                                     选择文件并开始检测
                                 </p>
                             )}
