@@ -319,7 +319,7 @@ export default function DetectionUI() {
     const showCanvas = isRunning || (tab === "img" && boxes.length > 0);
 
     return (
-        <div className="p-6 max-w-7xl mx-auto min-h-screen">
+        <div className="max-w-[1400px] mx-auto min-h-screen">
             <div className="grid grid-cols-[2fr_1fr] gap-3 h-full">
                 {/* ============ 左侧: 原始图像 + 检测结果 ============ */}
                 <div className="flex flex-col gap-1.5">

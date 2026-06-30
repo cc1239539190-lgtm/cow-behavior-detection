@@ -12,7 +12,7 @@ export default function Home() {
                 bg-blend-overlay
             "
         >
-            <div className="pt-6 pb-2 text-center">
+            <div className="pt-3 pb-1 text-center">
                 <h1 className="text-2xl font-bold text-blue-700">
                     奶牛行为智能检测系统 V1.0
                 </h1>
