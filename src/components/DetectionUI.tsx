@@ -322,22 +322,22 @@ export default function DetectionUI() {
         <div className="min-h-screen">
             <div className="grid grid-cols-[2fr_1fr] gap-3 h-full">
                 {/* ============ 左侧: 原始图像 + 检测结果 ============ */}
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 min-h-0">
                     {/* 上: 原始图像 */}
-                    <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-                        <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-100">
+                    <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                        <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-100 shrink-0">
                             <h3 className="text-sm font-bold text-gray-700">
                                 原始图像
                             </h3>
                         </div>
-                        <div className="flex-1 bg-black flex items-center justify-center min-h-[250px]">
+                        <div className="flex-1 min-h-0 bg-black flex items-center justify-center overflow-hidden">
                             {renderSourcePanel()}
                         </div>
                     </div>
 
                     {/* 下: 检测结果 Canvas */}
-                    <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-                        <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
+                    <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                        <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-100 shrink-0 flex items-center justify-between">
                             <h3 className="text-sm font-bold text-gray-700">
                                 检测结果
                             </h3>
@@ -352,10 +352,10 @@ export default function DetectionUI() {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex-1 bg-[#1a1a1a] flex items-center justify-center min-h-[250px] relative">
+                        <div className="flex-1 min-h-0 bg-[#1a1a1a] flex items-center justify-center overflow-hidden relative">
                             <canvas
                                 ref={canvasRef}
-                                className="w-full h-full object-contain"
+                                className="max-w-full max-h-full object-contain"
                             />
                             {!showCanvas && (
                                 <p className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm pointer-events-none">
@@ -367,9 +367,9 @@ export default function DetectionUI() {
                 </div>
 
                 {/* ============ 右侧: 功能栏 ============ */}
-                <div className="flex flex-col gap-0">
+                <div className="flex flex-col gap-0 min-h-0">
                     {/* 模型/参数设置 */}
-                    <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-4 overflow-y-auto">
+                    <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm p-4 overflow-y-auto">
                         <ModelSettings
                             selectedModelPath={selectedModel}
                             onModelChange={setSelectedModel}
@@ -377,7 +377,7 @@ export default function DetectionUI() {
                     </div>
 
                     {/* 功能 */}
-                    <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col justify-center">
+                    <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col justify-center">
                         <FunctionPanel
                             activeTab={tab}
                             onTabChange={handleTabChange}
@@ -389,7 +389,7 @@ export default function DetectionUI() {
                     </div>
 
                     {/* 检测结果文字输出 */}
-                    <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-4 overflow-y-auto">
+                    <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm p-4 overflow-y-auto">
                         <DetectionResultPanel
                             boxes={boxes}
                             frameWidth={frameSize.width}
