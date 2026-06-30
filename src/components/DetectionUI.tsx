@@ -87,7 +87,6 @@ export default function DetectionUI() {
 
     const runImgDetect = useCallback(async () => {
         if (!imgSrc) return;
-        // 等图片加载
         const img = new Image();
         img.src = imgSrc;
         await new Promise<void>((resolve) => {
@@ -97,13 +96,34 @@ export default function DetectionUI() {
 
         const cvs = canvasRef.current!;
         const ctx = cvs.getContext("2d")!;
-        cvs.width = img.naturalWidth;
-        cvs.height = img.naturalHeight;
-        ctx.drawImage(img, 0, 0);
+
+        // 限制分辨率上限1200px，等比缩放，避免canvas撑破面板
+        const MAX_DIM = 1200;
+        const drawScale = Math.min(
+            MAX_DIM / img.naturalWidth,
+            MAX_DIM / img.naturalHeight,
+            1
+        );
+        cvs.width = Math.round(img.naturalWidth * drawScale);
+        cvs.height = Math.round(img.naturalHeight * drawScale);
+        ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
+
         const result = await detectFrame(img, selectedModel);
-        drawBoxes(ctx, result);
+
+        // 检测框从原图坐标缩放到canvas坐标
+        const scaledBoxes = result.map((b) => ({
+            ...b,
+            x1: b.x1 * drawScale,
+            y1: b.y1 * drawScale,
+            x2: b.x2 * drawScale,
+            y2: b.y2 * drawScale,
+        }));
+        drawBoxes(ctx, scaledBoxes);
         setBoxes(result);
-        setFrameSize({ width: img.naturalWidth, height: img.naturalHeight });
+        setFrameSize({
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+        });
     }, [imgSrc, selectedModel]);
 
     // ---- 视频检测 ----
@@ -121,8 +141,18 @@ export default function DetectionUI() {
         if (!v.src) return;
         const cvs = canvasRef.current!;
         const ctx = cvs.getContext("2d")!;
-        cvs.width = v.videoWidth;
-        cvs.height = v.videoHeight;
+
+        // 限制分辨率上限1200px
+        const MAX_DIM = 1200;
+        const videoW = v.videoWidth;
+        const videoH = v.videoHeight;
+        const drawScale = Math.min(
+            MAX_DIM / videoW,
+            MAX_DIM / videoH,
+            1
+        );
+        cvs.width = Math.round(videoW * drawScale);
+        cvs.height = Math.round(videoH * drawScale);
 
         dataSender.configure({
             cameraId: "video-detection",
@@ -139,15 +169,22 @@ export default function DetectionUI() {
                 setIsRunning(false);
                 return;
             }
-            ctx.drawImage(v, 0, 0);
+            ctx.drawImage(v, 0, 0, cvs.width, cvs.height);
             const result = await detectFrame(v, selectedModel);
-            drawBoxes(ctx, result);
+            const scaledBoxes = result.map((b) => ({
+                ...b,
+                x1: b.x1 * drawScale,
+                y1: b.y1 * drawScale,
+                x2: b.x2 * drawScale,
+                y2: b.y2 * drawScale,
+            }));
+            drawBoxes(ctx, scaledBoxes);
             setBoxes(result);
-            setFrameSize({ width: cvs.width, height: cvs.height });
+            setFrameSize({ width: videoW, height: videoH });
             dataSender.cacheDetections(
-                toDetectionBoxes(result, cvs.width, cvs.height),
-                cvs.width,
-                cvs.height,
+                toDetectionBoxes(result, videoW, videoH),
+                videoW,
+                videoH,
                 "video"
             );
             animFrameRef.current = requestAnimationFrame(loop);
@@ -319,10 +356,10 @@ export default function DetectionUI() {
     const showCanvas = isRunning || (tab === "img" && boxes.length > 0);
 
     return (
-        <div className="min-h-screen">
+        <div className="h-[calc(100vh-56px)]">
             <div className="grid grid-cols-[2fr_1fr] gap-3 h-full">
                 {/* ============ 左侧: 原始图像 + 检测结果 ============ */}
-                <div className="flex flex-col gap-1.5 min-h-0">
+                <div className="flex flex-col gap-1.5 min-h-0 h-full">
                     {/* 上: 原始图像 */}
                     <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
                         <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-100 shrink-0">
@@ -367,7 +404,7 @@ export default function DetectionUI() {
                 </div>
 
                 {/* ============ 右侧: 功能栏 ============ */}
-                <div className="flex flex-col gap-0 min-h-0">
+                <div className="flex flex-col gap-0 min-h-0 h-full">
                     {/* 模型/参数设置 */}
                     <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm p-4 overflow-y-auto">
                         <ModelSettings
