@@ -5,7 +5,7 @@ export default function Home() {
     return (
         <main
             className="
-                min-h-screen
+                min-h-screen px-3
                 bg-[url('/background.jpg')]
                 bg-cover bg-center bg-fixed bg-no-repeat
                 bg-white/70
