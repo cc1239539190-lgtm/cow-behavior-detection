@@ -1,22 +1,30 @@
 import { PrismaClient } from "@/generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
 };
 
 function createPrismaClient(): PrismaClient {
-    const url = process.env.DATABASE_URL;
-    if (!url) {
-        throw new Error(
-            "DATABASE_URL 环境变量未设置，请参考 .env 文件配置 PostgreSQL 连接地址"
-        );
+    const url = process.env.DATABASE_URL || "file:./data/cow_detection.db";
+
+    // 根据连接串协议自动选择适配器
+    if (url.startsWith("postgresql://") || url.startsWith("postgres://")) {
+        // PostgreSQL（Vercel / Neon 线上部署）
+        const {
+            PrismaPg,
+        } = require("@prisma/adapter-pg") as typeof import("@prisma/adapter-pg");
+        const adapter = new PrismaPg({ connectionString: url });
+        return new PrismaClient({ adapter });
     }
-    const adapter = new PrismaPg({ connectionString: url });
+
+    // SQLite（本地 / Electron 离线版）
+    const {
+        PrismaBetterSqlite3,
+    } = require("@prisma/adapter-better-sqlite3") as typeof import("@prisma/adapter-better-sqlite3");
+    const adapter = new PrismaBetterSqlite3({ url });
     return new PrismaClient({ adapter });
 }
 
-/** 懒加载 PrismaClient：仅在首次 API 请求时才连接数据库，避免构建时因无 DATABASE_URL 报错 */
 function getPrisma(): PrismaClient {
     if (globalForPrisma.prisma) {
         return globalForPrisma.prisma;
@@ -26,7 +34,6 @@ function getPrisma(): PrismaClient {
     return client;
 }
 
-/** 代理对象，所有属性访问都会经过 getPrisma() 懒初始化 */
 export const db = new Proxy({} as PrismaClient, {
     get(_target, prop: keyof PrismaClient) {
         const client = getPrisma();

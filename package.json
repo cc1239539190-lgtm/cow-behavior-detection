@@ -1,16 +1,46 @@
 {
   "name": "cow-detection-system",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "next start",
-    "postinstall": "prisma generate"
+    "dev": "next dev -p 3500",
+    "build": "prisma generate --schema=prisma/schema-pg.prisma && next build",
+    "build:electron": "prisma generate && next build && node scripts/copy-standalone-assets.js",
+    "start": "next start -p 3500",
+    "postinstall": "prisma generate --schema=prisma/schema-pg.prisma",
+    "electron:dev": "next dev -p 3500 & sleep 3 && electron .",
+    "electron:build": "npm run build:electron && electron-builder --win",
+    "electron:build:dir": "npm run build:electron && electron-builder --win --dir"
+  },
+  "build": {
+    "appId": "com.cow-detection.system",
+    "productName": "奶牛行为智能检测系统",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      ".next/standalone/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "language": "2052"
+    },
+    "asar": false,
+    "npmRebuild": false
   },
   "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.8.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "better-sqlite3": "^12.11.1",
     "next": "^15.0.0",
     "onnxruntime-web": "^1.20.0",
     "pg": "^8.21.0",
@@ -19,12 +49,15 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.5.0",
     "dotenv": "^17.4.2",
+    "electron": "^43.0.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.7",
     "postcss": "^8.5.14",

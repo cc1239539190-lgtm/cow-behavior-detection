@@ -1,4 +1,7 @@
-// 奶牛行为智能检测系统 — Prisma 数据模型
+// 奶牛行为智能检测系统 — Prisma 数据模型 (PostgreSQL)
+// Vercel 线上部署使用此 schema
+//
+// 构建命令: prisma generate --schema=prisma/schema-pg.prisma
 
 generator client {
     provider = "prisma-client"
@@ -6,7 +9,7 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "postgresql"
 }
 
 model DetectionFrame {
