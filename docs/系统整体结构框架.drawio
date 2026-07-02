@@ -1,11 +1,11 @@
-<mxfile host="app.diagrams.net" modified="2025-01-01T00:00:00.000Z" agent="draw.io" version="22.0.0">
+<mxfile host="app.diagrams.net" agent="draw.io">
   <diagram name="系统整体结构框架" id="system-architecture">
-    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1193" dy="767" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <!-- 操作系统底层 -->
+        <!-- ===== 操作系统底层 ===== -->
         <mxCell id="os-box" value="操作系统" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#5C6BC0;fontSize=12;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
           <mxGeometry x="40" y="720" width="720" height="50" as="geometry" />
         </mxCell>
@@ -18,27 +18,22 @@
           <mxGeometry x="40" y="30" width="720" height="180" as="geometry" />
         </mxCell>
 
-        <!-- 左侧原始图像 -->
         <mxCell id="ui-source" value="原始图像展示区&lt;br&gt;· 图片上传预览&lt;br&gt;· 视频文件播放&lt;br&gt;· 摄像头实时画面" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
           <mxGeometry x="55" y="55" width="170" height="60" as="geometry" />
         </mxCell>
 
-        <!-- 检测结果 Canvas -->
         <mxCell id="ui-canvas" value="检测结果 Canvas&lt;br&gt;· 定位框绘制&lt;br&gt;· 行为标注叠加&lt;br&gt;· 置信度显示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
           <mxGeometry x="235" y="55" width="170" height="60" as="geometry" />
         </mxCell>
 
-        <!-- 模型/参数设置 -->
         <mxCell id="ui-model" value="模型/参数设置面板&lt;br&gt;· 模型下拉选择切换&lt;br&gt;· 自定义添加删除模型&lt;br&gt;· 置信度阈值滑块 0.05~0.95" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
           <mxGeometry x="415" y="55" width="170" height="60" as="geometry" />
         </mxCell>
 
-        <!-- 实时监控中心 -->
         <mxCell id="ui-monitor" value="实时监控中心仪表盘&lt;br&gt;· 行为分布柱状图&lt;br&gt;· 活跃摄像头/累计检测/今日告警&lt;br&gt;· 告警历史记录列表" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
           <mxGeometry x="595" y="55" width="155" height="60" as="geometry" />
         </mxCell>
 
-        <!-- 功能按钮 -->
         <mxCell id="ui-buttons" value="功能操作栏：图片检测 | 视频检测 | 实时摄像头 | 开始检测 | 停止检测 | 进入实时监控中心" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90CAF9;strokeColor=#1976D2;fontSize=10;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="55" y="130" width="690" height="30" as="geometry" />
         </mxCell>
@@ -83,7 +78,7 @@
         <mxCell id="db-box" value="数据库连接、操作模块" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=12;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
           <mxGeometry x="40" y="420" width="240" height="130" as="geometry" />
         </mxCell>
-        <mxCell id="db-items" value="· Prisma ORM 框架&lt;br&gt;· PrismaClient 懒加载 Proxy 代理模式&lt;br&gt;· DATABASE_URL 协议自适应：&lt;br&gt;  postgresql://→PrismaPg(线上)&lt;br&gt;  file:→PrismaBetterSqlite3(离线)&lt;br&gt;· detection_frames 1:N detection_boxes&lt;br&gt;· alerts 告警记录表" style="text;html=1;align=left;verticalAlign=top;fontSize=9;spacingLeft=5;spacingTop=35;" vertex="1" parent="1">
+        <mxCell id="db-items" value="· Prisma ORM 框架&lt;br&gt;· PrismaClient 懒加载 Proxy 代理模式&lt;br&gt;· DATABASE_URL 协议自适应：&lt;br&gt;  postgresql:// → PrismaPg (线上)&lt;br&gt;  file: → PrismaBetterSqlite3 (离线)&lt;br&gt;· detection_frames 1:N detection_boxes&lt;br&gt;· alerts 告警记录表" style="text;html=1;align=left;verticalAlign=top;fontSize=9;spacingLeft=5;spacingTop=35;" vertex="1" parent="1">
           <mxGeometry x="45" y="425" width="230" height="115" as="geometry" />
         </mxCell>
 
@@ -103,32 +98,11 @@
           <mxGeometry x="305" y="572" width="230" height="48" as="geometry" />
         </mxCell>
 
-        <!-- ===== 箭头：模块间关系 ===== -->
-        <!-- 用户操作界面 → 目标检测模块 -->
-        <mxCell id="arrow-ui-detect" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="140" y="210" as="sourcePoint" />
-            <mxPoint x="140" y="240" as="targetPoint" />
-          </mxGeometry>
+        <!-- ===== 箭头 ===== -->
+        <mxCell id="arrow-ui-detect" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="ui-source" target="detect-box">
+          <mxGeometry x="0.5" y="20" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
         </mxCell>
 
-        <!-- 用户操作界面 → 多模型管理 -->
-        <mxCell id="arrow-ui-model" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="500" y="210" as="sourcePoint" />
-            <mxPoint x="500" y="420" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- 用户操作界面 → API模块 -->
-        <mxCell id="arrow-ui-api" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="660" y="210" as="sourcePoint" />
-            <mxPoint x="660" y="240" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- 目标检测 → 异常检测引擎 -->
         <mxCell id="arrow-detect-anomaly" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="280" y="320" as="sourcePoint" />
@@ -136,51 +110,33 @@
           </mxGeometry>
         </mxCell>
 
-        <!-- 数据库 → 检测结果数据 -->
-        <mxCell id="arrow-db-data" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="160" y="550" as="sourcePoint" />
-            <mxPoint x="160" y="570" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="arrow-detect-db" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="detect-box" target="db-box">
+          <mxGeometry x="0.5" y="20" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
         </mxCell>
 
-        <!-- API → 数据库 -->
-        <mxCell id="arrow-api-db" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="560" y="490" as="sourcePoint" />
-            <mxPoint x="280" y="490" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="arrow-api-db" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="api-box" target="db-box">
+          <mxGeometry x="0.5" y="20" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
         </mxCell>
 
-        <!-- 目标检测 → 数据库 -->
-        <mxCell id="arrow-detect-db" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="140" y="400" as="sourcePoint" />
-            <mxPoint x="140" y="420" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- 多模型 → AI模型文件 -->
-        <mxCell id="arrow-model-file" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="420" y="550" as="sourcePoint" />
-            <mxPoint x="420" y="570" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-
-        <!-- 异常检测引擎 → 数据库 -->
         <mxCell id="arrow-anomaly-db" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="420" y="400" as="sourcePoint" />
-            <mxPoint x="280" y="400" as="targetPoint" />
+            <mxPoint x="280" y="485" as="targetPoint" />
           </mxGeometry>
         </mxCell>
 
-        <!-- 操作系统 → 各模块数据库 -->
-        <mxCell id="arrow-os-data" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
+        <mxCell id="arrow-db-data" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="db-box" target="data-box">
+          <mxGeometry x="0.5" y="20" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow-model-file" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="model-mgr-box" target="model-file-box">
+          <mxGeometry x="0.5" y="20" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <mxCell id="arrow-os" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="420" y="630" as="sourcePoint" />
-            <mxPoint x="420" y="720" as="targetPoint" />
+            <mxPoint x="400" y="630" as="sourcePoint" />
+            <mxPoint x="400" y="720" as="targetPoint" />
           </mxGeometry>
         </mxCell>
 
