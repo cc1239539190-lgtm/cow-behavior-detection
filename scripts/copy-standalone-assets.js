@@ -7,6 +7,14 @@ const path = require("path");
 
 const standaloneDir = path.join(__dirname, "..", ".next", "standalone");
 
+// 复制 .next/static/（CSS/JS 浏览器加载必需）
+const staticSrc = path.join(__dirname, "..", ".next", "static");
+const staticDest = path.join(standaloneDir, ".next", "static");
+if (fs.existsSync(staticSrc)) {
+    fs.cpSync(staticSrc, staticDest, { recursive: true });
+    console.log("[copy-assets] .next/static/ -> .next/standalone/.next/static/");
+}
+
 // 复制 public/（模型文件、图片等）
 const publicSrc = path.join(__dirname, "..", "public");
 const publicDest = path.join(standaloneDir, "public");
