@@ -1,0 +1,161 @@
+<mxfile host="app.diagrams.net" agent="draw.io">
+  <diagram name="模块结构" id="module-structure">
+    <mxGraphModel dx="1000" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- 标题 -->
+        <mxCell id="title" value="奶牛行为智能检测系统 — 模块结构图" style="text;html=1;align=center;fontSize=14;fontStyle=1;fontColor=#1565C0;" vertex="1" parent="1">
+          <mxGeometry x="140" y="20" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 主模块层 ===== -->
+        <mxCell id="main-layer" value="主模块" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;fontSize=12;fontStyle=1;verticalAlign=top;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="60" width="750" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- 目标检测与行为识别 -->
+        <mxCell id="m1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="50" y="80" width="230" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-title" value="目标检测与行为识别" style="text;html=1;align=center;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="82" width="220" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m1-desc" value="利用 YOLOv11 ONNX 模型对牛只画面&lt;br&gt;进行实时推理，区分站立/行走/躺卧/&lt;br&gt;进食/饮水五类行为" style="text;html=1;align=left;fontSize=8;spacingLeft=3;" vertex="1" parent="1">
+          <mxGeometry x="50" y="102" width="225" height="38" as="geometry" />
+        </mxCell>
+
+        <!-- 多模型管理 -->
+        <mxCell id="m2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="290" y="80" width="230" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-title" value="多模型管理" style="text;html=1;align=center;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="295" y="82" width="220" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m2-desc" value="支持自定义添加/删除 ONNX 模型&lt;br&gt;运行时动态切换，置信度阈值&lt;br&gt;滑块可实时调节" style="text;html=1;align=left;fontSize=8;spacingLeft=3;" vertex="1" parent="1">
+          <mxGeometry x="290" y="102" width="225" height="38" as="geometry" />
+        </mxCell>
+
+        <!-- 数据库连接和操作 -->
+        <mxCell id="m3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="50" y="155" width="230" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-title" value="数据库连接和操作" style="text;html=1;align=center;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="157" width="220" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m3-desc" value="通过 Prisma ORM 对 PostgreSQL/SQLite&lt;br&gt;数据库进行读写，存储检测帧、&lt;br&gt;检测框和告警记录" style="text;html=1;align=left;fontSize=8;spacingLeft=3;" vertex="1" parent="1">
+          <mxGeometry x="50" y="177" width="225" height="38" as="geometry" />
+        </mxCell>
+
+        <!-- 异常检测与告警 -->
+        <mxCell id="m4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="290" y="155" width="230" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-title" value="异常检测与告警" style="text;html=1;align=center;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="295" y="157" width="220" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m4-desc" value="追踪牛只躺卧持续时间，超出阈值&lt;br&gt;自动触发分级告警 (warning/critical)&lt;br&gt;支持摄像头离线检测 (30s)" style="text;html=1;align=left;fontSize=8;spacingLeft=3;" vertex="1" parent="1">
+          <mxGeometry x="290" y="177" width="225" height="38" as="geometry" />
+        </mxCell>
+
+        <!-- 数据上报与 API 接口 -->
+        <mxCell id="m5" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="530" y="80" width="230" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-title" value="数据上报与 API 接口" style="text;html=1;align=center;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="535" y="82" width="220" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m5-desc" value="RESTful API 接口：&lt;br&gt;· POST/GET /api/detection&lt;br&gt;· GET /api/stats&lt;br&gt;· GET/POST/PATCH /api/alerts&lt;br&gt;接收前端检测数据、查询历史、&lt;br&gt;返回统计数据和告警信息" style="text;html=1;align=left;fontSize=8;spacingLeft=5;" vertex="1" parent="1">
+          <mxGeometry x="530" y="105" width="225" height="108" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 支撑模块层 ===== -->
+        <mxCell id="sub-layer" value="支撑模块的方法" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=12;fontStyle=1;verticalAlign=top;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="270" width="750" height="420" as="geometry" />
+        </mxCell>
+
+        <!-- 目标检测与行为识别 的支撑方法 -->
+        <mxCell id="s1-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=9;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="50" y="295" width="340" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="s1-title" value="目标检测与行为识别 — 支撑方法" style="text;html=1;align=left;fontSize=9;fontStyle=1;fontColor=#2E7D32;spacingLeft=5;" vertex="1" parent="1">
+          <mxGeometry x="55" y="297" width="330" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="s1-items" value="detectFrame()&lt;br&gt;  统一检测入口，串联图像预处理→模型推理→NMS后处&lt;br&gt;  理→返回结构化结果&lt;br&gt;preprocess()&lt;br&gt;  letterbox 缩放至 640×640 + 像素归一化至 [0,1]&lt;br&gt;  + CHW 格式 Float32 张量生成&lt;br&gt;nms()&lt;br&gt;  非极大值抑制后处理，过滤低置信度候选框&lt;br&gt;drawBoxes()&lt;br&gt;  Canvas 绘制定位框与行为标注覆盖显示" style="text;html=1;align=left;verticalAlign=top;fontSize=8;spacingLeft=5;spacingTop=22;" vertex="1" parent="1">
+          <mxGeometry x="52" y="298" width="335" height="172" as="geometry" />
+        </mxCell>
+
+        <!-- 多模型管理 的支撑方法 -->
+        <mxCell id="s2-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=9;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="410" y="295" width="350" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="s2-title" value="多模型管理 — 支撑方法" style="text;html=1;align=left;fontSize=9;fontStyle=1;fontColor=#2E7D32;spacingLeft=5;" vertex="1" parent="1">
+          <mxGeometry x="415" y="297" width="340" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="s2-items" value="loadModel(modelPath)&lt;br&gt;  模型会话加载器，支持多模型 Map 键值对缓存&lt;br&gt;setConfidenceThreshold(val)&lt;br&gt;  置信度阈值全局参数调节，运行时动态生效&lt;br&gt;getAvailableModels()&lt;br&gt;  获取所有可用模型列表（内置 + 用户自定义）&lt;br&gt;addModel(name, path)&lt;br&gt;  添加自定义 ONNX 模型，localStorage 持久化&lt;br&gt;removeModel(path)&lt;br&gt;  删除模型，同步清理 session 缓存" style="text;html=1;align=left;verticalAlign=top;fontSize=8;spacingLeft=5;spacingTop=22;" vertex="1" parent="1">
+          <mxGeometry x="412" y="298" width="345" height="172" as="geometry" />
+        </mxCell>
+
+        <!-- 数据库连接和操作 的支撑方法 -->
+        <mxCell id="s3-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=9;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="50" y="490" width="340" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="s3-title" value="数据库连接和操作 — 支撑方法" style="text;html=1;align=left;fontSize=9;fontStyle=1;fontColor=#2E7D32;spacingLeft=5;" vertex="1" parent="1">
+          <mxGeometry x="55" y="492" width="330" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="s3-items" value="store.addDetection(cameraId, frame)&lt;br&gt;  将一帧检测结果及所有检测框写入数据库（帧:框 = 1:N）&lt;br&gt;store.getRecentDetections(cameraId, limit)&lt;br&gt;  按摄像头查询最近 N 帧检测记录&lt;br&gt;store.getBehaviorDistribution()&lt;br&gt;  统计最近 30 秒五类行为分布数量，供仪表盘柱状图&lt;br&gt;store.getAlerts(acknowledged?)&lt;br&gt;  告警列表查询，支持按是否已确认筛选&lt;br&gt;store.acknowledgeAlert(id)&lt;br&gt;  确认处理指定告警" style="text;html=1;align=left;verticalAlign=top;fontSize=8;spacingLeft=5;spacingTop=22;" vertex="1" parent="1">
+          <mxGeometry x="52" y="493" width="335" height="172" as="geometry" />
+        </mxCell>
+
+        <!-- 异常检测与告警 的支撑方法 -->
+        <mxCell id="s4-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=9;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="410" y="490" width="350" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="s4-title" value="异常检测与告警 — 支撑方法" style="text;html=1;align=left;fontSize=9;fontStyle=1;fontColor=#2E7D32;spacingLeft=5;" vertex="1" parent="1">
+          <mxGeometry x="415" y="492" width="340" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="s4-items" value="anomalyDetector.analyzeFrame(cameraId, frame)&lt;br&gt;  基于时间窗口状态机算法分析每帧数据&lt;br&gt;  · 连续 resting &lt; 3min → 无动作&lt;br&gt;  · 连续 resting ≥ 3min → warning 警告&lt;br&gt;  · 连续 resting ≥ 10min → critical 严重告警&lt;br&gt;  · 检测到非 resting → 状态重置、计时清零&lt;br&gt;anomalyDetector.checkOffline()&lt;br&gt;  每 15s 轮询各摄像头最后活跃时间&lt;br&gt;  · ≥ 30s 无数据 → camera_offline 告警&lt;br&gt;getStatus(cameraId)&lt;br&gt;  返回指定摄像头当前监控状态摘要" style="text;html=1;align=left;verticalAlign=top;fontSize=8;spacingLeft=5;spacingTop=22;" vertex="1" parent="1">
+          <mxGeometry x="412" y="493" width="345" height="172" as="geometry" />
+        </mxCell>
+
+        <!-- ===== 箭头：主模块→支撑方法 ===== -->
+        <mxCell id="arr1" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#388E3C;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="220" y="145" as="sourcePoint" />
+            <mxPoint x="220" y="295" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="arr2" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#388E3C;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="585" y="145" as="sourcePoint" />
+            <mxPoint x="585" y="295" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="arr3" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#388E3C;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="220" y="220" as="sourcePoint" />
+            <mxPoint x="220" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="arr4" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#388E3C;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="585" y="220" as="sourcePoint" />
+            <mxPoint x="585" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="arr5" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#388E3C;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="645" y="220" as="sourcePoint" />
+            <mxPoint x="645" y="295" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
